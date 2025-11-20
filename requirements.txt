@@ -1,7 +1,7 @@
-streamlit==1.28.1
-pandas==2.0.3
-nltk==3.8.1
-Sastrawi==1.0.1
-matplotlib==3.7.2
-wordcloud==1.9.2
-plotly==5.16.1
+streamlit
+pandas<2.1
+nltk
+Sastrawi
+matplotlib
+wordcloud>=1.9.3
+plotly
