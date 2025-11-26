@@ -1,7 +1,8 @@
 streamlit
-pandas<2.1
+pandas
 nltk
 Sastrawi
 matplotlib
 wordcloud>=1.9.3
 plotly
+
