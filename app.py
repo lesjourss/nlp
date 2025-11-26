@@ -12,7 +12,7 @@ import plotly.graph_objects as go
 import io
 
 
-from preprocessing import preprocess_reviews, get_statistics
+from preprocessing import preprocess_reviews, get_statistics, get_sentiment_statistics
 
 st.set_page_config(
     page_title="Analisis Topik Ulasan E-commerce",
@@ -105,11 +105,12 @@ if reviews and len(reviews) > 0:
         
         st.success("Preprocessing selesai!")
         
-        tab1, tab2, tab3, tab4 = st.tabs([
+        tab1, tab2, tab3, tab4, tab5= st.tabs([
             "Statistik",
             "Detail Preprocessing",
             "Word Cloud",
-            "Analisis Topik"
+            "Analisis Topik",
+            "Analysis Sentiment"
         ])
         
         with tab1:
@@ -255,7 +256,34 @@ if reviews and len(reviews) > 0:
                     file_name="analisis_topik.csv",
                     mime="text/csv"
                 )
-
+        
+        with tab5:
+            st.subheader("Sentiment Analysis")
+            sentiment_stats = get_sentiment_statistics(results)
+            col1, col2, col3 = st.columns(3)
+            
+            with col1:
+                st.metric(
+                    "Positif",
+                    f"{sentiment_stats['positive']} ulasan",       
+                    f"{sentiment_stats['positive_percentage']}%"
+                )
+            
+            with col2:
+                st.metric(
+                    "Netral",
+                    f"{sentiment_stats['neutral']} ulasan",       
+                    f"{sentiment_stats['neutral_percentage']}%"
+                )
+                
+            with col3:
+                st.metric(
+                    "Negatif",
+                    f"{sentiment_stats['negative']} ulasan",       
+                    f"{sentiment_stats['negative_percentage']}%"
+                )
+                
+            st.divider()
 else:
     st.info("Silakan upload file CSV atau input ulasan manual untuk memulai analisis")
 
