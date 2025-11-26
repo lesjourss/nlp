@@ -89,6 +89,94 @@ def create_comparison_dataframe(preprocessed_results):
             'After Stemming': len(result['stemmed']),
             'Final Text': ' '.join(result['stemmed'][:15]) + '...'
         })
+        
+def analyze_sentiment(text):
+    """
+    Simple rule-based sentiment analysis for Indonesian text
+    
+    Args:
+        text (str): Processed text (after stemming)
+        
+    Returns:
+        str: 'Positif', 'Negatif', atau 'Netral'
+    """
+    # Kata positif bahasa Indonesia
+    positive_words = {
+        'bagus', 'baik', 'puas', 'senang', 'suka', 'mantap', 'oke', 
+        'recommended', 'cepat', 'murah', 'kualitas', 'ori', 'original',
+        'rapih', 'rapi', 'sesuai', 'terima', 'kasih', 'thanks', 'memuaskan',
+        'awet', 'best', 'terbaik', 'perfect', 'sempurna', 'lengkap',
+        'helpful', 'ramah', 'ResponsIf', 'fast', 'aman'
+    }
+    
+    # Kata negatif bahasa Indonesia
+    negative_words = {
+        'buruk', 'jelek', 'kecewa', 'rusak', 'palsu', 'lambat', 'lama',
+        'mahal', 'tidak', 'bukan', 'jangan', 'salah', 'error', 'cacat',
+        'pecah', 'bocor', 'busuk', 'bau', 'kotor', 'lecet', 'penyok',
+        'komplain', 'tolak', 'hangus', 'gagal', 'cancel', 'bohong',
+        'tipu', 'kecil', 'beda', 'gak', 'enggak', 'jujur'
+    }
+    
+    # Hitung skor sentiment
+    words = text.lower().split()
+    positive_count = sum(1 for word in words if word in positive_words)
+    negative_count = sum(1 for word in words if word in negative_words)
+    
+    # Tentukan sentiment
+    if positive_count > negative_count:
+        return 'Positif'
+    elif negative_count > positive_count:
+        return 'Negatif'
+    else:
+        return 'Netral'
+
+
+def get_sentiment_statistics(preprocessed_results):
+    """
+    Get sentiment statistics from preprocessed results
+    
+    Args:
+        preprocessed_results (list): Results from preprocess_reviews()
+        
+    Returns:
+        dict: Sentiment statistics
+            - total: total reviews
+            - positive: count of positive reviews
+            - negative: count of negative reviews
+            - neutral: count of neutral reviews
+            - positive_percentage: percentage of positive
+            - negative_percentage: percentage of negative
+            - neutral_percentage: percentage of neutral
+    """
+    sentiments = []
+    
+    # Analyze sentiment untuk setiap review
+    for result in preprocessed_results:
+        sentiment = analyze_sentiment(result['final_text'])
+        sentiments.append(sentiment)
+    
+    # Hitung statistik
+    total = len(sentiments)
+    positive = sentiments.count('Positif')
+    negative = sentiments.count('Negatif')
+    neutral = sentiments.count('Netral')
+    
+    # Hitung persentase
+    positive_pct = round((positive / total * 100), 1) if total > 0 else 0
+    negative_pct = round((negative / total * 100), 1) if total > 0 else 0
+    neutral_pct = round((neutral / total * 100), 1) if total > 0 else 0
+    
+    return {
+        'total': total,
+        'positive': positive,
+        'negative': negative,
+        'neutral': neutral,
+        'positive_percentage': positive_pct,
+        'negative_percentage': negative_pct,
+        'neutral_percentage': neutral_pct,
+        'sentiments': sentiments  # List sentiment per review
+    }
     
     return pd.DataFrame(data)
 
@@ -117,3 +205,39 @@ if __name__ == "__main__":
     print(f"Avg tokens (original): {stats['avg_tokens_original']}")
     print(f"Avg tokens (final): {stats['avg_tokens_final']}")
     print(f"Reduction: {stats['reduction_rate']}%")
+
+    # Sentiment Analysis
+
+    print("\n" + "=" * 70)
+    print("SENTIMENT STATISTICS")
+    print("=" * 70)
+    sentiment_stats = get_sentiment_statistics(results)
+    print(f"Total Reviews: {sentiment_stats['total']}")
+    print(f"Positive: {sentiment_stats['positive']} ({sentiment_stats['positive_percentage']}%)")
+    print(f"Negative: {sentiment_stats['negative']} ({sentiment_stats['negative_percentage']}%)")
+    print(f"Neutral: {sentiment_stats['neutral']} ({sentiment_stats['neutral_percentage']}%)")
+    
+    # Text preprocessing statistics
+    print("\n" + "=" * 70)
+    print("TEXT PREPROCESSING STATISTICS")
+    print("=" * 70)
+    stats = get_statistics(results)
+    print(f"Total reviews: {stats['total_reviews']}")
+    print(f"Avg tokens (original): {stats['avg_tokens_original']}")
+    print(f"Avg tokens (final): {stats['avg_tokens_final']}")
+    print(f"Reduction: {stats['reduction_rate']}%")
+    
+    # Create DataFrame
+    print("\n" + "=" * 70)
+    print("RESULTS DATAFRAME")
+    print("=" * 70)
+    df = create_sentiment_dataframe(results)
+    print(df.to_string(index=False))
+    
+    # Word frequency
+    print("\n" + "=" * 70)
+    print("TOP 10 MOST COMMON WORDS")
+    print("=" * 70)
+    word_freq = get_word_frequency(results, top_n=10)
+    for word, count in word_freq:
+        print(f"{word}: {count}")
